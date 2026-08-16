@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avengers Doomsday Marathon Tracker — by KP</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --bg: #060807;
+  --panel: #11150f;
+  --panel-2: #171d15;
+  --border: #232b1f;
+  --text: #eef2ea;
+  --muted: #8b9488;
+  --gold: #d9a94a;
+  --green: #34d17c;
+  --green-deep: #0f8a4a;
+  --acid: #6cf07a;
+  --yellow: #e0b23c;
+  --orange: #e8823e;
+  --skip: #d94a4a;
+  --blue: #4a92e8;
+  --purple: #a879e0;
+  --tv: #34d17c;
+}
+
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{ background: var(--bg); color: var(--text); font-family:'Inter',-apple-system,sans-serif; min-height:100%; }
+body{
+  background-image:
+    radial-gradient(circle at 12% 0%, rgba(52,209,124,0.12), transparent 42%),
+    radial-gradient(circle at 88% 8%, rgba(217,169,74,0.07), transparent 40%);
+  padding: 0 0 60px 0;
+}
+.wrap{ max-width: 960px; margin: 0 auto; padding: 0 18px; }
+
+/* ---------- HERO / LOGO ---------- */
+.hero{ padding: 34px 18px 22px; border-bottom: 1px solid var(--border); position: relative; overflow:hidden; }
+.hero::before{
+  content:""; position:absolute; inset:0;
+  background: repeating-linear-gradient(115deg, rgba(52,209,124,0.06) 0 2px, transparent 2px 40px);
+  pointer-events:none;
+}
+.hero-inner{ max-width:960px; margin:0 auto; position:relative; }
+.logo-row{ display:flex; align-items:center; gap:14px; margin-bottom:14px; }
+.logo-mark{ flex:none; }
+.brand-sub{ color:var(--muted); font-size:11.5px; letter-spacing:2px; text-transform:uppercase; font-family:'Oswald',sans-serif; }
+
+h1{
+  font-family:'Bebas Neue', sans-serif;
+  font-size: clamp(32px, 6.6vw, 52px);
+  line-height:0.95; letter-spacing: 1px;
+  color: var(--text);
+}
+h1 .accent{
+  background: linear-gradient(180deg, var(--acid), var(--green-deep));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter: drop-shadow(0 0 14px rgba(52,209,124,0.35));
+}
+.hero-desc{ color:var(--muted); font-size:13.5px; margin-top:8px; max-width:560px; }
+.credit-line{ color:var(--muted); font-size:11px; margin-top:14px; letter-spacing:0.4px; font-family:'Oswald',sans-serif; }
+.credit-line span{ color:var(--acid); font-weight:600; }
+
+/* ---------- METER ---------- */
+.meter-card{
+  margin: 22px auto 0; max-width:960px; background: var(--panel); border:1px solid var(--border);
+  border-radius:14px; padding:20px 22px; display:flex; gap:24px; align-items:center; flex-wrap:wrap;
+}
+.ring-wrap{ position:relative; width:104px; height:104px; flex:none; }
+.ring-wrap svg{ transform:rotate(-90deg); }
+.ring-track{ fill:none; stroke:#1a2018; stroke-width:9; }
+.ring-fill{ fill:none; stroke:url(#ringGrad); stroke-width:9; stroke-linecap:round; transition:stroke-dashoffset .6s ease; }
+.ring-label{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.ring-pct{ font-family:'Bebas Neue',sans-serif; font-size:26px; }
+.ring-sub{ font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+
+.meter-stats{ display:flex; gap:22px; flex-wrap:wrap; flex:1; min-width:260px; }
+.stat{ min-width:88px; }
+.stat-num{ font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:0.5px; }
+.stat-runtime{ font-size:10.5px; color:var(--muted); font-family:'Oswald',sans-serif; margin-top:1px; }
+.stat-label{ font-size:9.5px; color:var(--muted); text-transform:uppercase; letter-spacing:1.1px; margin-top:2px; }
+.stat.watched .stat-num{ color:var(--green); }
+.stat.remaining .stat-num{ color:var(--gold); }
+
+.universe-bar{ width:100%; height:10px; border-radius:6px; overflow:hidden; display:flex; margin-top:14px; background:#151a13; }
+.universe-bar span{ height:100%; display:block; }
+.universe-legend{ display:flex; flex-wrap:wrap; gap:12px; margin-top:10px; font-size:11px; color:var(--muted); }
+.universe-legend .dot{ width:8px; height:8px; border-radius:2px; display:inline-block; margin-right:5px; }
+
+/* ---------- SAVE / EXPORT BAR ---------- */
+.save-bar{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:16px; padding-top:14px;
+  border-top:1px solid var(--border); font-size:11.5px; color:var(--muted); font-family:'Oswald',sans-serif;
+}
+#saveStatus{ display:flex; align-items:center; gap:6px; }
+#saveStatus .dot2{ width:7px; height:7px; border-radius:50%; background:var(--green); }
+.save-bar .spacer{ flex:1; }
+.mini-btn{
+  background:none; border:1px solid var(--border); color:var(--muted); font-size:11px;
+  padding:6px 10px; border-radius:7px; cursor:pointer; font-family:'Oswald',sans-serif;
+}
+.mini-btn:hover{ color:var(--text); border-color:#3a4536; }
+.mini-btn.danger:hover{ color:var(--skip); border-color:var(--skip); }
+
+/* ---------- CONTROLS ---------- */
+.controls{ display:flex; gap:8px; flex-wrap:wrap; margin:22px 0 4px; align-items:center; justify-content:space-between; }
+.tabs{ display:flex; gap:6px; flex-wrap:wrap; }
+.tab{
+  background: var(--panel); border:1px solid var(--border); color: var(--muted); padding:8px 14px; border-radius:8px;
+  font-size:12.5px; font-weight:600; cursor:pointer; transition: all .15s ease; font-family:'Oswald',sans-serif; letter-spacing:0.3px;
+}
+.tab:hover{ color:var(--text); border-color:#3a4536; }
+.tab.active{ background: var(--green-deep); border-color:var(--green-deep); color:#fff; }
+.level-filter{ display:flex; gap:6px; }
+.lvl-btn{ width:26px; height:26px; border-radius:7px; border:1.5px solid var(--border); cursor:pointer; background:var(--panel); position:relative; opacity:0.55; transition:all .15s ease; }
+.lvl-btn::after{ content:""; position:absolute; inset:5px; border-radius:4px; background:var(--dot); }
+.lvl-btn.active{ opacity:1; border-color:var(--dot); box-shadow:0 0 0 2px rgba(255,255,255,0.05); }
+.lvl-btn[data-level="essential"]{ --dot: var(--green); }
+.lvl-btn[data-level="recommended"]{ --dot: var(--yellow); }
+.lvl-btn[data-level="optional"]{ --dot: var(--orange); }
+.lvl-btn[data-level="skip"]{ --dot: var(--skip); }
+
+/* ---------- LIST ---------- */
+.era-heading{ display:flex; align-items:baseline; gap:10px; margin: 26px 0 10px; flex-wrap:wrap; }
+.era-heading .num{ font-family:'Bebas Neue',sans-serif; font-size:15px; background:var(--panel-2); border:1px solid var(--border); width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+.era-heading h2{ font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:0.5px; }
+.era-heading .yrs{ color:var(--muted); font-size:12px; font-family:'Oswald',sans-serif; }
+.era-progress{ margin-left:auto; font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; }
+
+.list{ display:flex; flex-direction:column; gap:6px; }
+.row{ display:flex; align-items:flex-start; gap:12px; background: var(--panel); border:1px solid var(--border); border-radius:10px; padding:11px 14px; transition: all .15s ease; cursor:pointer; }
+.row:hover{ border-color:#3a4536; }
+.row.done{ opacity:0.55; }
+.row.done .row-title{ text-decoration: line-through; text-decoration-color: var(--muted); }
+.row.target{ border-color: var(--gold); background: linear-gradient(90deg, rgba(217,169,74,0.10), var(--panel)); }
+.row.upcoming{ cursor:default; opacity:0.5; }
+.row.upcoming:hover{ border-color:var(--border); }
+.row.skipped{ opacity:0.4; }
+.row.skipped .row-title{ text-decoration: line-through; text-decoration-color: var(--muted); }
+.skip-toggle{
+  flex:none; margin-top:1px; width:26px; height:22px; border-radius:6px; border:1.5px solid var(--skip);
+  background:rgba(217,74,74,0.10); color:var(--skip); font-size:9.5px; font-weight:700; letter-spacing:0.3px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; font-family:'Oswald',sans-serif;
+  transition:all .15s ease; opacity:0.6;
+}
+.skip-toggle:hover{ background:rgba(217,74,74,0.22); }
+.skip-toggle.active{ background:var(--skip); border-color:var(--skip); color:#fff; }
+.stat.skipped .stat-num{ color:var(--skip); }
+
+.check{ width:22px; height:22px; border-radius:6px; border:2px solid #3a4536; flex:none; margin-top:1px; display:flex; align-items:center; justify-content:center; transition:all .15s ease; }
+.row.done .check{ background: var(--green); border-color: var(--green); }
+.check svg{ width:13px; height:13px; opacity:0; transition:opacity .1s ease; }
+.row.done .check svg{ opacity:1; }
+.lock{ width:22px; height:22px; flex:none; margin-top:1px; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:13px; }
+
+.row-num{ font-family:'Bebas Neue',sans-serif; color:var(--muted); font-size:14px; width:22px; text-align:right; flex:none; margin-top:2px; }
+.row-main{ flex:1; min-width:0; }
+.row-title{ font-size:14px; font-weight:600; }
+.row-meta{ font-size:11px; color:var(--muted); margin-top:2px; font-family:'Oswald',sans-serif; }
+.row-brief{ font-size:12px; color:#aeb5a9; margin-top:5px; line-height:1.4; }
+.pill{ font-size:9.5px; font-weight:700; letter-spacing:0.4px; text-transform:uppercase; padding:3px 8px; border-radius:20px; flex:none; font-family:'Oswald',sans-serif; margin-top:1px; }
+.pill.essential{ background:rgba(52,209,124,0.15); color:var(--green); }
+.pill.recommended{ background:rgba(224,178,60,0.15); color:var(--yellow); }
+.pill.optional{ background:rgba(232,130,62,0.15); color:var(--orange); }
+.pill.skip{ background:rgba(217,74,74,0.15); color:var(--skip); }
+.pill.tba{ background:rgba(139,148,136,0.15); color:var(--muted); }
+.where-tag{
+  display:inline-flex; align-items:center; gap:4px; margin-top:6px; font-size:11px;
+  color:var(--acid); background:rgba(52,209,124,0.08); border:1px dashed rgba(52,209,124,0.3);
+  padding:3px 8px; border-radius:6px; cursor:pointer; font-family:'Oswald',sans-serif; width:fit-content;
+}
+.where-tag:hover{ background:rgba(52,209,124,0.16); }
+.where-tag.missing{ color:var(--gold); background:rgba(217,169,74,0.08); border-color:rgba(217,169,74,0.3); }
+.uni-chip{ width:7px; height:7px; border-radius:2px; flex:none; margin-top:6px; }
+
+.empty{ text-align:center; color:var(--muted); padding:30px; font-size:13px; }
+.footer-note{ text-align:center; color:var(--muted); font-size:11px; margin-top:34px; font-family:'Oswald',sans-serif; letter-spacing:0.5px; }
+
+/* ---------- CONFETTI OVERLAY ---------- */
+#celebrateOverlay{
+  position:fixed; inset:0; background:rgba(3,6,4,0.88); z-index:999; display:none;
+  align-items:center; justify-content:center; flex-direction:column; text-align:center; cursor:pointer;
+}
+#celebrateOverlay.show{ display:flex; }
+#confettiCanvas{ position:fixed; inset:0; z-index:1000; pointer-events:none; }
+.celebrate-title{ font-family:'Bebas Neue',sans-serif; font-size: clamp(36px,9vw,72px); letter-spacing:1px; color:var(--acid); text-shadow:0 0 30px rgba(108,240,122,0.5); }
+.celebrate-sub{ color:var(--text); font-size:15px; margin-top:10px; max-width:420px; font-family:'Oswald',sans-serif; }
+.celebrate-hint{ color:var(--muted); font-size:11px; margin-top:22px; }
+
+/* ---------- IMPORT MODAL ---------- */
+#importModal{ position:fixed; inset:0; background:rgba(3,6,4,0.8); z-index:998; display:none; align-items:center; justify-content:center; padding:20px; }
+#importModal.show{ display:flex; }
+.modal-box{ background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:20px; max-width:420px; width:100%; }
+.modal-box h3{ font-family:'Bebas Neue',sans-serif; font-size:20px; margin-bottom:10px; letter-spacing:0.5px; }
+.modal-box p{ font-size:12px; color:var(--muted); margin-bottom:10px; line-height:1.5; }
+.modal-box textarea{ width:100%; height:100px; background:#0d100c; border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:11px; padding:8px; font-family:monospace; }
+.modal-actions{ display:flex; gap:8px; margin-top:12px; justify-content:flex-end; }
+
+@media (max-width:560px){
+  .meter-card{ padding:16px; }
+  .meter-stats{ gap:14px; }
+  .era-progress{ display:none; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="confettiCanvas"></canvas>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="logo-row">
+      <svg class="logo-mark" width="42" height="42" viewBox="0 0 42 42">
+        <circle cx="21" cy="21" r="19" fill="none" stroke="url(#logoRing)" stroke-width="2.5"/>
+        <path d="M21 8 L30 30 L21 25 L12 30 Z" fill="url(#logoRing)"/>
+        <defs>
+          <linearGradient id="logoRing" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#6cf07a"/>
+            <stop offset="100%" stop-color="#0f8a4a"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="brand-sub">Ultimate Marathon Tracker</span>
+    </div>
+    <h1>ROAD TO <span class="accent">DOOMSDAY</span></h1>
+    <p class="hero-desc">84 released titles to track, 6 more still on the way. Tap to mark watched — plot briefs and runtimes included so you can decide what's worth your time.</p>
+    <p class="credit-line">Curated by <span>Keyur Parmar</span></p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="meter-card">
+    <div class="ring-wrap">
+      <svg width="104" height="104" viewBox="0 0 104 104">
+        <defs>
+          <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0f8a4a"/>
+            <stop offset="100%" stop-color="#6cf07a"/>
+          </linearGradient>
+        </defs>
+        <circle class="ring-track" cx="52" cy="52" r="45"></circle>
+        <circle id="ringFill" class="ring-fill" cx="52" cy="52" r="45" stroke-dasharray="282.7" stroke-dashoffset="282.7"></circle>
+      </svg>
+      <div class="ring-label"><div class="ring-pct" id="pctLabel">0%</div><div class="ring-sub">Complete</div></div>
+    </div>
+
+    <div class="meter-stats">
+      <div class="stat"><div class="stat-num" id="totalNum">84</div><div class="stat-runtime" id="totalRuntime">—</div><div class="stat-label">Total</div></div>
+      <div class="stat watched"><div class="stat-num" id="watchedNum">0</div><div class="stat-runtime" id="watchedRuntime">0h 0m</div><div class="stat-label">Watched</div></div>
+      <div class="stat remaining"><div class="stat-num" id="remainingNum">84</div><div class="stat-runtime" id="remainingRuntime">—</div><div class="stat-label">Remaining</div></div>
+      <div class="stat"><div class="stat-num" id="essentialNum">0/0</div><div class="stat-runtime">&nbsp;</div><div class="stat-label">Essential done</div></div>
+      <div class="stat skipped"><div class="stat-num" id="skippedNum">0</div><div class="stat-runtime" id="skippedRuntime">0h 0m</div><div class="stat-label">Skipped</div></div>
+    </div>
+
+    <div style="width:100%;">
+      <div class="universe-bar" id="universeBar"></div>
+      <div class="universe-legend" id="universeLegend"></div>
+    </div>
+
+    <div class="save-bar" style="width:100%;">
+      <span id="saveStatus"><span class="dot2"></span><span id="saveStatusText">Saves automatically to this browser</span></span>
+      <span class="spacer"></span>
+      <button class="mini-btn" id="exportBtn">Export backup</button>
+      <button class="mini-btn" id="importBtn">Import backup</button>
+      <button class="mini-btn danger" id="resetBtn">Reset progress</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="tabs" id="eraTabs"></div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <div class="level-filter" id="levelFilter">
+        <button class="lvl-btn active" data-level="essential" title="Essential"></button>
+        <button class="lvl-btn active" data-level="recommended" title="Recommended"></button>
+        <button class="lvl-btn active" data-level="optional" title="Optional"></button>
+        <button class="lvl-btn active" data-level="skip" title="Skip"></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="listContainer"></div>
+
+  <div class="footer-note">WHATEVER IT TAKES TO BE READY FOR DOOMSDAY.</div>
+</div>
+
+<div id="celebrateOverlay">
+  <div class="celebrate-title">🎉 MARATHON COMPLETE 🎉</div>
+  <div class="celebrate-sub">You've reached Avengers: Doomsday. 85 stories, one road. You're ready.</div>
+  <div class="celebrate-hint">Tap anywhere to close</div>
+</div>
+
+<div id="importModal">
+  <div class="modal-box">
+    <h3>Import backup</h3>
+    <p>Paste the contents of a previously exported backup file below, then restore.</p>
+    <textarea id="importText" placeholder='{"1":true,"2":true,...}'></textarea>
+    <div class="modal-actions">
+      <button class="mini-btn" id="importCancel">Cancel</button>
+      <button class="mini-btn" id="importConfirm">Restore</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// r = movie runtime (min). ep/epMin = series episode count / avg runtime (min).
+const TITLES = [
+{n:1,t:"X-Men",y:2000,ty:"Film",lvl:"essential",uni:"FOX",era:1,r:104,brief:"A team of mutants led by Professor X defends humanity from Magneto's plan to convert world leaders into mutants by force."},
+{n:2,t:"Spider-Man",y:2002,ty:"Film",lvl:"essential",uni:"SONY",era:1,r:121,where:"Prime Video / Sony LIV",brief:"Peter Parker gains spider powers and becomes a hero while the Green Goblin terrorizes New York."},
+{n:3,t:"X2: X-Men United",y:2003,ty:"Film",lvl:"essential",uni:"FOX",era:1,r:134,brief:"The X-Men ally with Magneto's Brotherhood to stop a militant colonel bent on eradicating mutantkind."},
+{n:4,t:"Daredevil (Director's Cut)",y:2003,ty:"Film",lvl:"optional",uni:"LEGACY",era:1,r:133,where:"Not currently found (India)",brief:"A blind lawyer moonlights as a vigilante, taking down the crime boss Kingpin and assassin Bullseye."},
+{n:5,t:"X-Men: The Last Stand",y:2006,ty:"Film",lvl:"recommended",uni:"FOX",era:1,r:104,brief:"A mutant 'cure' divides the X-Men just as Jean Grey's destructive Phoenix persona resurfaces."},
+{n:6,t:"Spider-Man 2",y:2004,ty:"Film",lvl:"essential",uni:"SONY",era:1,r:127,where:"Netflix / Prime Video / Sony LIV",brief:"Peter struggles to balance his double life while Doctor Octopus's mechanical arms take control of him."},
+{n:7,t:"The Punisher",y:2004,ty:"Film",lvl:"optional",uni:"LEGACY",era:1,r:124,where:"Not currently found (India)",brief:"An undercover agent turns brutal vigilante after his family is murdered by a crime syndicate."},
+{n:8,t:"Elektra",y:2005,ty:"Film",lvl:"skip",uni:"LEGACY",era:1,r:97,where:"Netflix",brief:"A resurrected assassin is hired to kill a father and daughter, then chooses to protect them instead."},
+{n:9,t:"Fantastic Four",y:2005,ty:"Film",lvl:"recommended",uni:"LEGACY",era:1,r:106,where:"JioHotstar",brief:"Four astronauts gain extraordinary powers from cosmic radiation and must stop a former colleague turned villain."},
+{n:10,t:"Hulk",y:2003,ty:"Film",lvl:"optional",uni:"LEGACY",era:1,r:138,where:"Prime Video",brief:"A gamma radiation accident unleashes Bruce Banner's rage-fueled alter ego, tied to his father's dark experiments."},
+{n:11,t:"Blade: Trinity",y:2004,ty:"Film",lvl:"skip",uni:"LEGACY",era:1,r:113,where:"Not currently found (India)",brief:"Vampire hunter Blade teams with the Nightstalkers to take down a resurrected Dracula."},
+{n:12,t:"Ghost Rider",y:2007,ty:"Film",lvl:"skip",uni:"LEGACY",era:1,r:114,where:"Not currently found (India)",brief:"A stunt biker who sold his soul becomes a hellfire-wielding bounty hunter for the devil."},
+{n:13,t:"Spider-Man 3",y:2007,ty:"Film",lvl:"optional",uni:"SONY",era:1,r:139,where:"Netflix / Prime Video / Sony LIV",brief:"Peter faces Sandman and Venom while a symbiote amplifies his darker impulses."},
+{n:14,t:"Fantastic Four: Rise of the Silver Surfer",y:2007,ty:"Film",lvl:"recommended",uni:"LEGACY",era:1,r:92,where:"JioHotstar",brief:"The team faces the enigmatic Silver Surfer, herald of the planet-devouring Galactus."},
+{n:15,t:"The Amazing Spider-Man",y:2012,ty:"Film",lvl:"essential",uni:"SONY",era:1,r:136,where:"Prime Video / Sony LIV",brief:"A rebooted Peter Parker uncovers his parents' secret past while battling the mutated Lizard."},
+{n:16,t:"The Amazing Spider-Man 2",y:2014,ty:"Film",lvl:"essential",uni:"SONY",era:1,r:142,where:"Prime Video / Sony LIV",brief:"Peter juggles love and heroism as Electro and the Green Goblin threaten New York."},
+{n:17,t:"X-Men Origins: Wolverine",y:2009,ty:"Film",lvl:"recommended",uni:"FOX",era:1,r:107,brief:"Wolverine's brutal past unravels as his brother Sabretooth and the Weapon X program betray him."},
+{n:18,t:"X-Men: First Class",y:2011,ty:"Film",lvl:"essential",uni:"FOX",era:1,r:132,brief:"Young Charles Xavier and Erik Lensherr form the X-Men during the Cuban Missile Crisis, before their ideologies split them apart."},
+{n:19,t:"The Wolverine",y:2013,ty:"Film",lvl:"optional",uni:"FOX",era:1,r:126,brief:"Same story beat as above — Logan in Japan, stripped of his healing factor and forced to fight without it."},
+{n:20,t:"Iron Man",y:2008,ty:"Film",lvl:"essential",uni:"MCU",era:2,r:126,brief:"Weapons tycoon Tony Stark builds a powered suit after a near-death capture, kicking off the MCU."},
+{n:21,t:"The Incredible Hulk",y:2008,ty:"Film",lvl:"recommended",uni:"MCU",era:2,r:112,brief:"Bruce Banner evades General Ross while searching for a cure, culminating in a clash with the Abomination."},
+{n:22,t:"Iron Man 2",y:2010,ty:"Film",lvl:"recommended",uni:"MCU",era:2,r:124,brief:"Tony battles Whiplash and Justin Hammer while secretly dying from palladium poisoning."},
+{n:23,t:"Thor",y:2011,ty:"Film",lvl:"essential",uni:"MCU",era:2,r:115,brief:"Banished to Earth, Thor must learn humility before reclaiming his hammer to stop Loki's coup."},
+{n:24,t:"Captain America: The First Avenger",y:2011,ty:"Film",lvl:"essential",uni:"MCU",era:2,r:124,brief:"Scrawny Steve Rogers becomes a super-soldier to fight the Nazi-splinter group HYDRA."},
+{n:25,t:"The Avengers",y:2012,ty:"Film",lvl:"essential",uni:"MCU",era:2,r:143,brief:"Earth's mightiest heroes assemble to stop Loki and a Chitauri invasion of New York."},
+{n:26,t:"Iron Man 3",y:2013,ty:"Film",lvl:"essential",uni:"MCU",era:2,r:130,brief:"Tony confronts the terrorist Mandarin while grappling with panic attacks after the Avengers invasion."},
+{n:27,t:"Thor: The Dark World",y:2013,ty:"Film",lvl:"recommended",uni:"MCU",era:2,r:112,brief:"Thor must save the universe from the Dark Elf Malekith and the reality-warping Aether."},
+{n:28,t:"Captain America: The Winter Soldier",y:2014,ty:"Film",lvl:"essential",uni:"MCU",era:2,r:136,brief:"Cap uncovers HYDRA's infiltration of SHIELD while facing a mysterious assassin from his past."},
+{n:29,t:"Guardians of the Galaxy",y:2014,ty:"Film",lvl:"essential",uni:"MCU",era:2,r:121,brief:"A ragtag group of misfits bands together to stop Ronan the Accuser from obtaining a powerful orb."},
+{n:30,t:"Avengers: Age of Ultron",y:2015,ty:"Film",lvl:"essential",uni:"MCU",era:2,r:141,brief:"Tony Stark's AI creation Ultron turns against humanity, forcing the Avengers to fight for survival."},
+{n:31,t:"Ant-Man",y:2015,ty:"Film",lvl:"recommended",uni:"MCU",era:2,r:117,brief:"Ex-con Scott Lang dons a size-shifting suit to pull off a heist that could save the world."},
+{n:32,t:"Captain America: Civil War",y:2016,ty:"Film",lvl:"essential",uni:"MCU",era:2,r:147,brief:"The Avengers fracture over government oversight, pitting Cap and Iron Man against each other."},
+{n:33,t:"Doctor Strange",y:2016,ty:"Film",lvl:"essential",uni:"MCU",era:2,r:115,brief:"A brilliant but arrogant surgeon learns the mystic arts after a car accident destroys his career."},
+{n:34,t:"Guardians of the Galaxy Vol. 2",y:2017,ty:"Film",lvl:"essential",uni:"MCU",era:2,r:136,brief:"Star-Lord discovers his father's true, dangerous identity while the team faces a cosmic threat."},
+{n:35,t:"Spider-Man: Homecoming",y:2017,ty:"Film",lvl:"essential",uni:"MCU",era:2,r:133,brief:"Peter balances high school life while trying to stop Vulture's black-market weapons trade."},
+{n:36,t:"Thor: Ragnarok",y:2017,ty:"Film",lvl:"essential",uni:"MCU",era:2,r:130,brief:"Thor is exiled to a gladiatorial planet as his sister Hela threatens to destroy Asgard."},
+{n:37,t:"Black Panther",y:2018,ty:"Film",lvl:"essential",uni:"MCU",era:2,r:134,brief:"T'Challa becomes king of Wakanda and must defend his throne and nation from Killmonger."},
+{n:38,t:"Avengers: Infinity War",y:2018,ty:"Film",lvl:"essential",uni:"MCU",era:2,r:149,brief:"The Avengers race to stop Thanos from collecting all six Infinity Stones before it's too late."},
+{n:39,t:"Ant-Man and the Wasp",y:2018,ty:"Film",lvl:"recommended",uni:"MCU",era:2,r:118,brief:"Scott Lang teams with Hope van Dyne to rescue her mother from the microscopic Quantum Realm."},
+{n:40,t:"Captain Marvel",y:2019,ty:"Film",lvl:"optional",uni:"MCU",era:2,r:123,brief:"A former Air Force pilot discovers her cosmic powers amid a decades-long Kree-Skrull war."},
+{n:41,t:"Avengers: Endgame",y:2019,ty:"Film",lvl:"essential",uni:"MCU",era:2,r:181,brief:"The surviving Avengers attempt a time heist across the MCU to undo Thanos's snap."},
+{n:42,t:"Spider-Man: Far From Home",y:2019,ty:"Film",lvl:"essential",uni:"MCU",era:2,r:129,brief:"Peter faces the illusion-master Mysterio while trying to enjoy a European school trip."},
+{n:43,t:"X-Men: Days of Future Past",y:2014,ty:"Film",lvl:"recommended",uni:"FOX",era:2,r:132,brief:"Wolverine is sent to the past to prevent a dystopian future where Sentinels hunt mutants to extinction."},
+{n:44,t:"Deadpool",y:2016,ty:"Film",lvl:"optional",uni:"FOX",era:2,r:108,brief:"A disfigured mercenary gains regenerative powers and turns foul-mouthed vigilante against the man who ruined him."},
+{n:45,t:"Deadpool 2",y:2018,ty:"Film",lvl:"optional",uni:"FOX",era:2,r:119,brief:"Deadpool forms X-Force to protect a troubled young mutant from a time-traveling soldier."},
+{n:46,t:"Logan",y:2017,ty:"Film",lvl:"essential",uni:"FOX",era:2,r:137,brief:"An aging, ailing Wolverine protects a young mutant girl while confronting his own mortality."},
+{n:47,t:"X-Men: Apocalypse",y:2016,ty:"Film",lvl:"recommended",uni:"FOX",era:2,r:144,brief:"The X-Men must stop an ancient mutant god from wiping out modern civilization to rebuild the world."},
+{n:48,t:"Dark Phoenix",y:2019,ty:"Film",lvl:"skip",uni:"FOX",era:2,r:113,brief:"Jean Grey's powers spiral out of control after a cosmic accident, threatening the entire X-Men team."},
+{n:49,t:"The New Mutants",y:2020,ty:"Film",lvl:"skip",uni:"FOX",era:2,r:94,brief:"Young mutants held in a secret facility fight to escape and control their terrifying emerging powers."},
+{n:50,t:"WandaVision",y:2021,ty:"Series",lvl:"essential",uni:"TV",era:3,ep:9,epMin:38,brief:"Wanda Maximoff builds an idyllic sitcom reality in Westview while grieving Vision — hiding a darker secret."},
+{n:51,t:"The Falcon and the Winter Soldier",y:2021,ty:"Series",lvl:"essential",uni:"TV",era:3,ep:6,epMin:50,brief:"Sam Wilson and Bucky Barnes team up against an extremist group while wrestling with the Captain America mantle."},
+{n:52,t:"Loki (S1)",y:2021,ty:"Series",lvl:"essential",uni:"TV",era:3,ep:6,epMin:48,brief:"A variant Loki is recruited by the TVA to fix timeline anomalies, uncovering a multiversal conspiracy."},
+{n:53,t:"Black Widow",y:2021,ty:"Film",lvl:"recommended",uni:"MCU",era:3,r:134,brief:"Natasha Romanoff confronts her past with the Red Room and the family of fellow operatives she left behind."},
+{n:54,t:"What If...? (S1)",y:2021,ty:"Series",lvl:"optional",uni:"TV",era:3,ep:9,epMin:33,brief:"The Watcher narrates alternate MCU timelines where a single changed decision alters everything."},
+{n:55,t:"Shang-Chi and the Legend of the Ten Rings",y:2021,ty:"Film",lvl:"essential",uni:"MCU",era:3,r:132,brief:"Shang-Chi confronts his father's legacy as the ruthless leader of the Ten Rings organization."},
+{n:56,t:"Eternals",y:2021,ty:"Film",lvl:"recommended",uni:"MCU",era:3,r:156,brief:"Ancient immortal beings reunite to stop the emergence of Celestial-born Deviants threatening Earth."},
+{n:57,t:"Hawkeye (S1)",y:2021,ty:"Series",lvl:"optional",uni:"TV",era:3,ep:6,epMin:48,brief:"Clint Barton trains new archer Kate Bishop while confronting his 'Ronin' past during the holidays."},
+{n:58,t:"Spider-Man: No Way Home",y:2021,ty:"Film",lvl:"essential",uni:"MCU",era:3,r:148,brief:"Peter's identity reveal fractures reality, pulling in villains and heroes from other Spider-Man universes."},
+{n:59,t:"Moon Knight (S1)",y:2022,ty:"Series",lvl:"optional",uni:"TV",era:3,ep:6,epMin:47,brief:"A man with dissociative identity disorder discovers he's the avatar of the Egyptian moon god Khonshu."},
+{n:60,t:"Doctor Strange in the Multiverse of Madness",y:2022,ty:"Film",lvl:"essential",uni:"MCU",era:3,r:126,brief:"Strange journeys through the multiverse to protect a girl with reality-warping powers from a corrupted Wanda."},
+{n:61,t:"Ms. Marvel (S1)",y:2022,ty:"Series",lvl:"essential",uni:"TV",era:3,ep:6,epMin:47,brief:"Teenager Kamala Khan discovers cosmic powers tied to her family's hidden heritage."},
+{n:62,t:"Thor: Love and Thunder",y:2022,ty:"Film",lvl:"recommended",uni:"MCU",era:3,r:119,brief:"Thor teams with Jane Foster, now the Mighty Thor, to stop the god-killer Gorr."},
+{n:63,t:"She-Hulk: Attorney at Law (S1)",y:2022,ty:"Series",lvl:"optional",uni:"TV",era:3,ep:9,epMin:33,brief:"Jennifer Walters juggles superhero life and legal practice after gaining Hulk-like powers."},
+{n:64,t:"Werewolf by Night",y:2022,ty:"Special",lvl:"optional",uni:"TV",era:3,r:54,brief:"A secret society of monster hunters competes in a deadly hunt that unleashes a werewolf curse."},
+{n:65,t:"Black Panther: Wakanda Forever",y:2022,ty:"Film",lvl:"essential",uni:"MCU",era:3,r:161,brief:"Wakanda mourns T'Challa while defending itself from the underwater nation of Talokan."},
+{n:66,t:"The Guardians of the Galaxy Holiday Special",y:2022,ty:"Special",lvl:"optional",uni:"TV",era:3,r:44,brief:"The Guardians attempt to give Peter Quill the perfect Earth Christmas gift."},
+{n:67,t:"Ant-Man and the Wasp: Quantumania",y:2023,ty:"Film",lvl:"recommended",uni:"MCU",era:3,r:125,brief:"The Langs are pulled into the Quantum Realm and confront the time-conquering Kang."},
+{n:68,t:"Guardians of the Galaxy Vol. 3",y:2023,ty:"Film",lvl:"essential",uni:"MCU",era:3,r:150,brief:"The Guardians fight to save Rocket from his traumatic past and the sinister High Evolutionary."},
+{n:69,t:"Secret Invasion (S1)",y:2023,ty:"Series",lvl:"skip",uni:"TV",era:3,ep:6,epMin:37,brief:"Nick Fury uncovers a decades-long Skrull infiltration of Earth's institutions."},
+{n:70,t:"Loki (S2)",y:2023,ty:"Series",lvl:"essential",uni:"TV",era:3,ep:6,epMin:50,brief:"Loki fights to stabilize the fracturing timeline and save the TVA from total collapse."},
+{n:71,t:"Echo (S1)",y:2024,ty:"Series",lvl:"recommended",uni:"TV",era:3,ep:5,epMin:42,brief:"Maya Lopez returns home to confront her family's ties to the Kingpin's criminal empire."},
+{n:72,t:"X-Men '97 (S1)",y:2024,ty:"Series",lvl:"essential",uni:"TV",era:3,ep:10,epMin:23,brief:"The animated X-Men team navigates loss and new threats in this direct continuation of the '90s series."},
+{n:73,t:"Your Friendly Neighborhood Spider-Man (S1)",y:2025,ty:"Series",lvl:"recommended",uni:"TV",era:4,ep:10,epMin:24,brief:"An animated look at a young Peter Parker's earliest days as Spider-Man."},
+{n:74,t:"Captain America: Brave New World",y:2025,ty:"Film",lvl:"essential",uni:"MCU",era:4,r:118,brief:"Sam Wilson's Captain America navigates an international incident tied to a familiar old enemy."},
+{n:75,t:"Daredevil: Born Again (S1)",y:2025,ty:"Series",lvl:"essential",uni:"TV",era:4,ep:9,epMin:42,brief:"Matt Murdock and Wilson Fisk's paths collide again as Fisk becomes mayor of New York."},
+{n:76,t:"Thunderbolts*",y:2025,ty:"Film",lvl:"essential",uni:"MCU",era:4,r:127,brief:"A team of morally grey antiheroes is assembled for a black-ops mission that spirals into something much bigger."},
+{n:77,t:"Ironheart (S1)",y:2025,ty:"Series",lvl:"recommended",uni:"TV",era:4,ep:6,epMin:30,brief:"Riri Williams builds her own advanced suit of armor and gets entangled with a mysterious sorcerer."},
+{n:78,t:"The Fantastic Four: First Steps",y:2025,ty:"Film",lvl:"essential",uni:"MCU",era:4,r:115,brief:"Marvel's First Family debuts in a retro-futuristic world, confronting the cosmic threat of Galactus."},
+{n:79,t:"Eyes of Wakanda (S1)",y:2025,ty:"Series",lvl:"optional",uni:"TV",era:4,ep:4,epMin:32,brief:"An animated anthology following Wakandan warriors across history protecting sacred vibranium artifacts."},
+{n:80,t:"Marvel Zombies (S1)",y:2025,ty:"Series",lvl:"skip",uni:"TV",era:4,ep:4,epMin:30,brief:"A group of survivors fights through a zombie-infected corner of the Marvel universe."},
+{n:81,t:"Wonder Man (S1)",y:2025,ty:"Series",lvl:"recommended",uni:"TV",era:4,ep:8,epMin:32,brief:"Stuntman-turned-hero Simon Williams navigates Hollywood, identity, and his own superhero destiny."},
+{n:82,t:"Spider-Man: Brand New Day",y:2026,ty:"Film",lvl:"essential",uni:"MCU",era:4,r:145,brief:"Peter Parker's next chapter — full plot still under wraps."},
+{n:83,t:"Vision Quest (S1)",y:2026,ty:"Series",lvl:"recommended",uni:"TV",era:4,ep:8,epMin:60,brief:"Vision searches for a new identity and purpose after the events of WandaVision."},
+{n:84,t:"Avengers: Doomsday",y:2026,ty:"Film",lvl:"essential",uni:"MCU",era:4,r:165,target:true,brief:"The Avengers unite against Victor von Doom — the destination this entire marathon has been building toward."},
+{n:85,t:"Avengers: Secret Wars",y:2027,ty:"Film",lvl:"optional",uni:"MCU",era:4,upcoming:true,brief:"The multiverse-spanning finale expected to unite Marvel's heroes across realities. Not yet released."},
+{n:86,t:"Black Panther 3",y:0,ty:"Film",lvl:"optional",uni:"MCU",era:4,upcoming:true,brief:"The next chapter for Wakanda — plot currently unannounced. Not yet released."},
+{n:87,t:"Shang-Chi 2",y:0,ty:"Film",lvl:"optional",uni:"MCU",era:4,upcoming:true,brief:"A sequel continuing Shang-Chi's story — plot unannounced. Not yet released."},
+{n:88,t:"Doctor Strange 3",y:0,ty:"Film",lvl:"optional",uni:"MCU",era:4,upcoming:true,brief:"A third Doctor Strange film — plot unannounced. Not yet released."},
+{n:89,t:"Thor 5",y:0,ty:"Film",lvl:"optional",uni:"MCU",era:4,upcoming:true,brief:"A fifth Thor film — plot unannounced. Not yet released."},
+{n:90,t:"Untitled MCU Projects",y:0,ty:"Film",lvl:"optional",uni:"MCU",era:4,upcoming:true,brief:"Additional unannounced MCU titles slated around Secret Wars. Not yet released."},
+];
+
+const TRACKABLE = TITLES.filter(t=>!t.upcoming);
+const UPCOMING = TITLES.filter(t=>t.upcoming);
+
+const ERAS = [
+  {id:1, label:"2000–2008", name:"Legacy / Beginnings"},
+  {id:2, label:"2008–2019", name:"Infinity Saga"},
+  {id:3, label:"2021–2024", name:"Multiverse Saga"},
+  {id:4, label:"2025–Beyond", name:"Road to Doomsday"},
+];
+
+const UNI_COLORS = {
+  MCU:{c:"#34d17c", label:"MCU"},
+  FOX:{c:"#e0b23c", label:"Fox X-Men"},
+  SONY:{c:"#4a92e8", label:"Sony Spider-Man"},
+  LEGACY:{c:"#a879e0", label:"Legacy / Other"},
+  TV:{c:"#6cf07a", label:"Disney+ / TV"},
+};
+
+const STORAGE_KEY = "doomsday-marathon-progress-v2";
+let progress = {};
+const WHERE_STORAGE_KEY = "doomsday-marathon-where-v1";
+let whereData = {};
+const SKIP_STORAGE_KEY = "doomsday-marathon-skip-v1";
+let skipped = {};
+let activeEra = "all";
+let activeLevels = new Set(["essential","recommended","optional","skip"]);
+let storageWorks = true;
+
+const listContainer = document.getElementById('listContainer');
+const eraTabs = document.getElementById('eraTabs');
+
+function itemRuntime(item){
+  if(item.r) return item.r;
+  if(item.ep && item.epMin) return item.ep * item.epMin;
+  return 0;
+}
+function formatDuration(mins){
+  if(!mins) return "—";
+  const h = Math.floor(mins/60), m = Math.round(mins%60);
+  return `${h}h ${m}m`;
+}
+
+function buildTabs(){
+  const allTab = document.createElement('button');
+  allTab.className = 'tab active';
+  allTab.textContent = 'All';
+  allTab.onclick = () => setEra('all', allTab);
+  eraTabs.appendChild(allTab);
+  ERAS.forEach(e=>{
+    const btn = document.createElement('button');
+    btn.className = 'tab';
+    btn.textContent = e.name;
+    btn.onclick = () => setEra(e.id, btn);
+    eraTabs.appendChild(btn);
+  });
+}
+function setEra(id, btn){
+  activeEra = id;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+document.querySelectorAll('.lvl-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const lvl = btn.dataset.level;
+    if(activeLevels.has(lvl)){ activeLevels.delete(lvl); btn.classList.remove('active'); }
+    else { activeLevels.add(lvl); btn.classList.add('active'); }
+    render();
+  });
+});
+
+document.getElementById('resetBtn').addEventListener('click', async ()=>{
+  if(!confirm('Reset all watched progress? This cannot be undone.')) return;
+  progress = {};
+  await saveProgress();
+  render();
+});
+
+async function toggleItem(id){
+  const item = TITLES.find(t=>t.n===id);
+  if(item.upcoming) return;
+  progress[id] = !progress[id];
+  if(progress[id] && skipped[id]){ skipped[id] = false; await saveSkipped(); }
+  render();
+  await saveProgress();
+  if(item.target && progress[id]){ celebrate(); }
+}
+
+function setSaveStatus(text, ok){
+  document.getElementById('saveStatusText').textContent = text;
+  document.querySelector('#saveStatus .dot2').style.background = ok ? 'var(--green)' : 'var(--skip)';
+}
+
+async function saveProgress(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    storageWorks = true;
+    setSaveStatus('Saved to this browser', true);
+  }catch(e){
+    storageWorks = false;
+    setSaveStatus('Save failed — use Export backup below', false);
+    console.error('Save failed', e);
+  }
+}
+async function loadProgress(){
+  try{
+    const val = localStorage.getItem(STORAGE_KEY);
+    if(val){ progress = JSON.parse(val); }
+    setSaveStatus('Progress loaded', true);
+  }catch(e){
+    progress = {};
+    setSaveStatus('No saved progress found yet', true);
+  }
+}
+
+function defaultWhere(uni){
+  return (uni === 'SONY' || uni === 'LEGACY') ? 'Find Yourself 😅' : 'JioHotstar (EN/HI)';
+}
+async function loadWhere(){
+  try{
+    const val = localStorage.getItem(WHERE_STORAGE_KEY);
+    if(val){ whereData = JSON.parse(val); }
+  }catch(e){ whereData = {}; }
+}
+async function saveWhere(){
+  try{ localStorage.setItem(WHERE_STORAGE_KEY, JSON.stringify(whereData)); }
+  catch(e){ console.error('Where save failed', e); }
+}
+function editWhere(id, ev){
+  ev.stopPropagation();
+  const item = TITLES.find(t=>t.n===id);
+  const current = whereData[id] || item.where || defaultWhere(item.uni);
+  const val = prompt('Where can you watch "' + item.t + '"? (platform, language notes etc.)', current);
+  if(val !== null){
+    whereData[id] = val.trim() || defaultWhere(item.uni);
+    saveWhere();
+    render();
+  }
+}
+
+async function loadSkipped(){
+  try{
+    const val = localStorage.getItem(SKIP_STORAGE_KEY);
+    if(val){ skipped = JSON.parse(val); }
+  }catch(e){ skipped = {}; }
+}
+async function saveSkipped(){
+  try{ localStorage.setItem(SKIP_STORAGE_KEY, JSON.stringify(skipped)); }
+  catch(e){ console.error('Skip save failed', e); }
+}
+async function toggleSkip(id, ev){
+  ev.stopPropagation();
+  const item = TITLES.find(t=>t.n===id);
+  if(item.upcoming) return;
+  skipped[id] = !skipped[id];
+  if(skipped[id] && progress[id]){ progress[id] = false; await saveProgress(); }
+  await saveSkipped();
+  render();
+}
+
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(progress, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'doomsday-marathon-progress.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+document.getElementById('importBtn').addEventListener('click', ()=>{
+  document.getElementById('importModal').classList.add('show');
+});
+document.getElementById('importCancel').addEventListener('click', ()=>{
+  document.getElementById('importModal').classList.remove('show');
+});
+document.getElementById('importConfirm').addEventListener('click', async ()=>{
+  try{
+    const val = JSON.parse(document.getElementById('importText').value);
+    progress = val;
+    await saveProgress();
+    render();
+    document.getElementById('importModal').classList.remove('show');
+  }catch(e){ alert('That did not look like valid backup data.'); }
+});
+
+function buildUniverseBar(){
+  const bar = document.getElementById('universeBar');
+  const legend = document.getElementById('universeLegend');
+  const counts = {};
+  TRACKABLE.forEach(t=>{ counts[t.uni] = (counts[t.uni]||0)+1; });
+  const total = TRACKABLE.length;
+  bar.innerHTML = ''; legend.innerHTML = '';
+  Object.keys(UNI_COLORS).forEach(key=>{
+    const n = counts[key] || 0;
+    const pct = (n/total*100).toFixed(1);
+    const seg = document.createElement('span');
+    seg.style.width = pct + '%'; seg.style.background = UNI_COLORS[key].c;
+    bar.appendChild(seg);
+    const item = document.createElement('span');
+    item.innerHTML = `<span class="dot" style="background:${UNI_COLORS[key].c}"></span>${UNI_COLORS[key].label} · ${n}`;
+    legend.appendChild(item);
+  });
+}
+
+function iconType(ty){ return ty === 'Series' ? '📺' : ty === 'Special' ? '✨' : '🎬'; }
+
+function render(){
+  const filtered = TITLES.filter(t => (activeEra==='all' || t.era===activeEra) && activeLevels.has(t.lvl));
+  listContainer.innerHTML = '';
+  if(activeEra === 'all'){
+    ERAS.forEach(era=>{
+      const items = filtered.filter(t=>t.era===era.id);
+      if(items.length===0) return;
+      appendEraBlock(era, items);
+    });
+  } else {
+    const era = ERAS.find(e=>e.id===activeEra);
+    if(filtered.length===0){
+      const empty = document.createElement('div'); empty.className='empty'; empty.textContent = 'No titles match the current filters.';
+      listContainer.appendChild(empty);
+    } else { appendEraBlock(era, filtered); }
+  }
+  updateStats();
+}
+
+function appendEraBlock(era, items){
+  const heading = document.createElement('div');
+  heading.className = 'era-heading';
+  const trackableItems = items.filter(i=>!i.upcoming);
+  const doneCount = trackableItems.filter(i=>progress[i.n]).length;
+  heading.innerHTML = `
+    <span class="num">${era.id}</span>
+    <h2>${era.name}</h2>
+    <span class="yrs">${era.label}</span>
+    <span class="era-progress">${doneCount}/${trackableItems.length} watched</span>
+  `;
+  listContainer.appendChild(heading);
+
+  const list = document.createElement('div');
+  list.className = 'list';
+
+  items.forEach(item=>{
+    const row = document.createElement('div');
+    row.className = 'row' + (progress[item.n] ? ' done' : '') + (skipped[item.n] ? ' skipped' : '') + (item.target ? ' target' : '') + (item.upcoming ? ' upcoming' : '');
+    if(!item.upcoming) row.onclick = () => toggleItem(item.n);
+    const uniColor = UNI_COLORS[item.uni].c;
+    const yearLabel = item.y ? item.y : 'TBA';
+    let metaLine = `${yearLabel} · ${item.ty}`;
+    if(item.ty === 'Series'){
+      metaLine += item.ep ? ` · ${item.ep} episodes · ~${formatDuration(item.ep*item.epMin)} total` : '';
+    } else if(item.r){
+      metaLine += ` · ${item.r} min`;
+    } else if(item.upcoming){
+      metaLine += ` · Runtime TBA`;
+    }
+    const checkOrLock = item.upcoming
+      ? `<span class="lock">🔒</span>`
+      : `<span class="check"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#060807" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+    const pillClass = item.upcoming ? 'tba' : item.lvl;
+    const pillLabel = item.upcoming ? 'Not released' : item.lvl;
+    row.innerHTML = `
+      <span class="row-num">${item.n}</span>
+      ${checkOrLock}
+      ${item.upcoming ? '' : `<button class="skip-toggle${skipped[item.n] ? ' active' : ''}" onclick="toggleSkip(${item.n}, event)" title="Mark as skipped">SKIP</button>`}
+      <span class="uni-chip" style="background:${uniColor}" title="${UNI_COLORS[item.uni].label}"></span>
+      <span class="row-main">
+        <div class="row-title">${iconType(item.ty)} ${item.t}${item.target ? ' 🎯' : ''}</div>
+        <div class="row-meta">${metaLine}</div>
+        <div class="row-brief">${item.brief}</div>
+        <span class="where-tag${(whereData[item.n]||item.where||defaultWhere(item.uni)).includes('Not currently found') || (whereData[item.n]||item.where||defaultWhere(item.uni))==='Find Yourself 😅' ? ' missing':''}" onclick="editWhere(${item.n}, event)">📺 ${whereData[item.n] || item.where || defaultWhere(item.uni)} <span style="opacity:0.6">✏️</span></span>
+      </span>
+      <span class="pill ${pillClass}">${pillLabel}</span>
+    `;
+    list.appendChild(row);
+  });
+  listContainer.appendChild(list);
+}
+
+function updateStats(){
+  const total = TRACKABLE.length;
+  const watched = TRACKABLE.filter(t=>progress[t.n]).length;
+  const skippedCount = TRACKABLE.filter(t=>skipped[t.n]).length;
+  const remaining = total - watched - skippedCount;
+  const pct = Math.round(((watched+skippedCount)/total)*100);
+
+  const totalRt = TRACKABLE.reduce((s,t)=>s+itemRuntime(t),0);
+  const watchedRt = TRACKABLE.filter(t=>progress[t.n]).reduce((s,t)=>s+itemRuntime(t),0);
+  const skippedRt = TRACKABLE.filter(t=>skipped[t.n]).reduce((s,t)=>s+itemRuntime(t),0);
+  const remainingRt = totalRt - watchedRt - skippedRt;
+
+  document.getElementById('totalNum').textContent = total;
+  document.getElementById('totalRuntime').textContent = formatDuration(totalRt) + ' total (+6 upcoming)';
+  document.getElementById('watchedNum').textContent = watched;
+  document.getElementById('watchedRuntime').textContent = formatDuration(watchedRt);
+  document.getElementById('remainingNum').textContent = remaining;
+  document.getElementById('remainingRuntime').textContent = formatDuration(remainingRt);
+  document.getElementById('skippedNum').textContent = skippedCount;
+  document.getElementById('skippedRuntime').textContent = formatDuration(skippedRt);
+
+  const essentials = TRACKABLE.filter(t=>t.lvl==='essential');
+  const essDone = essentials.filter(t=>progress[t.n]).length;
+  document.getElementById('essentialNum').textContent = `${essDone}/${essentials.length}`;
+
+  document.getElementById('pctLabel').textContent = pct + '%';
+  const circumference = 2*Math.PI*45;
+  const offset = circumference - (pct/100)*circumference;
+  document.getElementById('ringFill').style.strokeDasharray = circumference;
+  document.getElementById('ringFill').style.strokeDashoffset = offset;
+}
+
+/* ---------- CONFETTI ---------- */
+const canvas = document.getElementById('confettiCanvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+function celebrate(){
+  document.getElementById('celebrateOverlay').classList.add('show');
+  const colors = ['#6cf07a','#34d17c','#0f8a4a','#d9a94a','#eef2ea'];
+  particles = [];
+  for(let i=0;i<160;i++){
+    particles.push({
+      x: Math.random()*canvas.width, y: -20 - Math.random()*canvas.height*0.4,
+      vx: (Math.random()-0.5)*3, vy: 2+Math.random()*4,
+      size: 4+Math.random()*6, color: colors[Math.floor(Math.random()*colors.length)],
+      rot: Math.random()*360, vrot: (Math.random()-0.5)*8
+    });
+  }
+  requestAnimationFrame(animateConfetti);
+}
+function animateConfetti(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  let alive = false;
+  particles.forEach(p=>{
+    p.x += p.vx; p.y += p.vy; p.vy += 0.03; p.rot += p.vrot;
+    if(p.y < canvas.height + 20) alive = true;
+    ctx.save();
+    ctx.translate(p.x, p.y); ctx.rotate(p.rot*Math.PI/180);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
+    ctx.restore();
+  });
+  if(alive) requestAnimationFrame(animateConfetti);
+  else ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+document.getElementById('celebrateOverlay').addEventListener('click', ()=>{
+  document.getElementById('celebrateOverlay').classList.remove('show');
+});
+
+async function init(){
+  buildTabs();
+  buildUniverseBar();
+  await loadProgress();
+  await loadWhere();
+  await loadSkipped();
+  render();
+}
+init();
+</script>
+</body>
+</html>
